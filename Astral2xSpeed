@@ -1,0 +1,150 @@
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+
+-- Create ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Parent = plr:WaitForChild("PlayerGui")
+
+-- Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Parent = gui
+
+-- TextBox
+local textbox = Instance.new("TextBox")
+textbox.Size = UDim2.new(0, 200, 0, 40)
+textbox.Position = UDim2.new(0.5, -100, 0.5, -20)
+textbox.PlaceholderText = "Enter Key"
+textbox.Text = ""
+textbox.TextScaled = true
+textbox.Parent = frame
+
+-- Button
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 100, 0, 40)
+button.Position = UDim2.new(0.5, -50, 0.5, 40)
+button.Text = "Submit"
+button.TextScaled = true
+button.Parent = frame
+
+-- Label
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 0, 30)
+label.Position = UDim2.new(0, 0, 0, -40)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.Text = "Key Required"
+label.TextScaled = true
+label.Parent = frame
+
+-- Key Check
+button.MouseButton1Click:Connect(function()
+    if textbox.Text == "DEMO1" then
+        gui:Destroy()
+        warn("[Key System] Correct key! Starting script...")
+
+        local rs = game:GetService("ReplicatedStorage")
+        local remotes = rs:WaitForChild("RemoteFunctions")
+
+        -- Difficulty vote
+        local difficulty = "dif_impossible"
+
+        -- Unit placements (2x speed, adjusted timings)
+        local placements = {
+            {
+                time = 24, -- lawnmower (fast deploy)
+                unit = "unit_lawnmower",
+                slot = "1",
+                data = {
+                    ["Valid"] = true,
+                    ["PathIndex"] = 3,
+                    ["Position"] = Vector3.new(-843.87384, 62.1803055, -123.052032),
+                    ["DistanceAlongPath"] = 248.00653076171875,
+                    ["CF"] = CFrame.new(-843.87384, 62.1803055, -123.052032, -0, 0, 1, 0, 1, -0, -1, 0, -0),
+                    ["Rotation"] = 180
+                }
+            },
+            {
+                time = 45, -- 1st rafflesia
+                unit = "unit_rafflesia",
+                slot = "2",
+                data = {
+                    ["Valid"] = true,
+                    ["PathIndex"] = 3,
+                    ["Position"] = Vector3.new(-842.381287, 62.1803055, -162.012131),
+                    ["DistanceAlongPath"] = 180.5395965576172,
+                    ["CF"] = CFrame.new(-842.381287, 62.1803055, -162.012131, 1, 0, -0, -0, 1, -0, -0, 0, 1),
+                    ["Rotation"] = 180
+                }
+            },
+            {
+                time = 83, -- 2nd rafflesia
+                unit = "unit_rafflesia",
+                slot = "2",
+                data = {
+                    ["Valid"] = true,
+                    ["PathIndex"] = 3,
+                    ["Position"] = Vector3.new(-842.381287, 62.1803055, -164.507538),
+                    ["DistanceAlongPath"] = 178.044189453125,
+                    ["CF"] = CFrame.new(-842.381287, 62.1803055, -164.507538, 1, 0, -0, -0, 1, -0, -0, 0, 1),
+                    ["Rotation"] = 180
+                }
+            },
+            {
+                time = 108, -- 3rd rafflesia (was 113, now faster)
+                unit = "unit_rafflesia",
+                slot = "2",
+                data = {
+                    ["Valid"] = true,
+                    ["PathIndex"] = 2,
+                    ["Position"] = Vector3.new(-864.724426, 62.1803055, -199.052032),
+                    ["DistanceAlongPath"] = 100.65655517578125,
+                    ["CF"] = CFrame.new(-864.724426, 62.1803055, -199.052032, -0, 0, 1, 0, 1, -0, -1, 0, -0),
+                    ["Rotation"] = 180
+                }
+            }
+        }
+
+        local function placeUnit(unitName, slot, data)
+            local hotbar = plr.PlayerGui.BackpackGui.Backpack.Hotbar
+            local slotBtn = hotbar:FindFirstChild(slot)
+            if slotBtn then
+                warn("[Placing] " .. unitName .. " from Slot " .. slot .. " at " .. os.clock() .. "s")
+                remotes.PlaceUnit:InvokeServer(unitName, data)
+            else
+                warn("[Error] Slot " .. slot .. " not found")
+            end
+        end
+
+        function startGame()
+            remotes.PlaceDifficultyVote:InvokeServer(difficulty)
+            warn("[Game] Voted difficulty: " .. difficulty)
+
+            task.delay(7.5, function() -- scaled (5 * 1.5)
+                for _, p in ipairs(placements) do
+                    task.delay(p.time, function()
+                        placeUnit(p.unit, p.slot, p.data)
+                    end)
+                end
+            end)
+        end
+
+        task.spawn(function()
+            while true do
+                task.wait(9) -- scaled (6 * 1.5)
+                remotes.RestartGame:InvokeServer()
+            end
+        end)
+
+        while true do
+            startGame()
+            task.wait(205.5) -- scaled (137 * 1.5)
+        end
+    else
+        textbox.Text = ""
+        label.Text = "Invalid Key!"
+        label.TextColor3 = Color3.fromRGB(255, 0, 0)
+    end
+end)
