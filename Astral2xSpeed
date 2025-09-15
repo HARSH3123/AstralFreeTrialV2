@@ -54,7 +54,7 @@ button.MouseButton1Click:Connect(function()
         -- Unit placements (2x speed, adjusted timings)
         local placements = {
             {
-                time = 24, -- lawnmower (fast deploy)
+                time = 22, -- lawnmower (fast deploy)
                 unit = "unit_lawnmower",
                 slot = "1",
                 data = {
