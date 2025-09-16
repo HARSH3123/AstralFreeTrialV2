@@ -1,5 +1,20 @@
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
+ 
+local whitelist = {
+    ["lol"] = true,
+    ["FriendNameHere"] = true
+}
+ 
+if not whitelist[plr.Name] then
+    plr:Kick("Free Trial Of This Script Is Over Pls Contact Script Owner At Discord.")
+    return
+end
+ 
+print(plr.Name .. " is whitelisted. Waiting for key...")
+
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
 
 -- Create ScreenGui
 local gui = Instance.new("ScreenGui")
